@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const {router} = require('./ChatLogic')
+const {routes} = require('./routes/index')
 const axios = require("axios");
 
 const app = express();
@@ -11,6 +12,8 @@ app.use(cors());
 
 
 app.use('/chat',router);
+
+app.use('/user',routes);
 
 const JDoodle_API = "https://api.jdoodle.com/v1/execute";
 const CLIENT_ID = "bba5ac294a110b3174d32215c629137c"; // Replace with your JDoodle Client ID

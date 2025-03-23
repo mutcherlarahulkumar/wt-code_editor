@@ -5,13 +5,13 @@ import DecryptedText from '../Extras/DeprycatedText'
 import VariableProximity from '../Extras/VariableProximity'
 import { useRecoilState } from 'recoil';
 import { code, terminaltext } from "../recoil/atoms";
+// Removed duplicate import
+import { Dialog } from '@headlessui/react';
+import axios from "axios";
 
 export default function CodeEditor() {
-    // const [content, setContent] = useState("");
     const [language, setLanguage] = useState("javascript");
-    // const [terminal, setTerminal] = useState("");
     const [isExecuting, setIsExecuting] = useState(false);
-
     const [content, setContent] = useRecoilState(code);
     const [terminal, setTerminal] = useRecoilState(terminaltext);
 
@@ -44,7 +44,29 @@ export default function CodeEditor() {
             setIsExecuting(false);
         }
     };
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const containerRef = useRef(null);
+
+    const [notesTitle,setNotesTitle] = useState('');
+
+    function handleSave() {
+        console.log(notesTitle);
+        const token = localStorage.getItem('token');
+        axios.post('http://localhost:5000/user/save', {
+            title: notesTitle,
+            description: content
+        }, {
+            headers: {
+            'Authorization': `Bearer ${token}`
+            }
+        }).then((response) => {
+            console.log(response);
+        }).catch((error) => {
+            console.log(error);
+        });
+        setIsDialogOpen(false);
+    }
+
     return (
         <div
             className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white"
@@ -60,7 +82,44 @@ export default function CodeEditor() {
             <div style={{ marginTop: '4rem' }}>
             
 </div>
-
+                <div>
+                <button
+                    className="m-5 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-md transition-all"
+                    onClick={() => setIsDialogOpen(true)}
+                >
+                    Save Code
+                </button>
+                <div></div>
+                <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <Dialog.Title className="text-lg font-bold">Save Code</Dialog.Title>
+                            <Dialog.Description className="mt-2">
+                                Do you want to save your code?
+                            </Dialog.Description>
+                            <Dialog.Description className="mt-2">
+                                <input type="text" className="b-3 border" placeholder="Enter Title" onChange={(e)=>{
+                                    setNotesTitle(e.target.value);
+                                }}/>
+                            </Dialog.Description>
+                            <div className="mt-4 flex justify-end space-x-4">
+                                <button
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                    onClick={() => setIsDialogOpen(false)}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    onClick={handleSave}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </Dialog>
+            </div>
             {/* Language Selector */}
             <div className="mb-4">
                 <select
